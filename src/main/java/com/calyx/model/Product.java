@@ -13,7 +13,7 @@ public class Product {
     private Long id;
     private String name;
     private int caloriesPer100g;
-    private double proteins;
-    private double fats;
-    private double cars;
+    private double proteinsPer100g;
+    private double fatsPer100g;
+    private double carbsPer100g;
 }

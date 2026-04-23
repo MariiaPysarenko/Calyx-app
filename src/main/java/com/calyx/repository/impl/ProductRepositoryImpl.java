@@ -1,4 +1,152 @@
 package com.calyx.repository.impl;
 
-public class ProductRepositoryImpl {
+import com.calyx.mapper.ProductMapper;
+import com.calyx.model.Product;
+import com.calyx.repository.ProductRepository;
+import com.calyx.util.ConnectionUtil;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class ProductRepositoryImpl implements ProductRepository {
+    @Override
+    public Product save(Product product) {
+        String sql = """
+        INSERT INTO product (name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g)
+        VALUES (?, ?, ?, ?, ?)
+        RETURNING id
+        """;
+
+        try (Connection conn = ConnectionUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, product.getName());
+            stmt.setInt(2, product.getCaloriesPer100g());
+            stmt.setDouble(3, product.getProteinsPer100g());
+            stmt.setDouble(4, product.getFatsPer100g());
+            stmt.setDouble(5, product.getCarbsPer100g());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                product.setId(rs.getLong("id"));
+            }
+
+            return product;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving product", e);
+        }
+    }
+
+    @Override
+    public Optional<Product> findById(Long id) {
+        String sql = """
+        SELECT id, name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
+        FROM product
+        WHERE id = ?
+        """;
+
+        try (Connection conn = ConnectionUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Product product = new Product(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getInt("calories_per_100g"),
+                        rs.getDouble("proteins_per_100g"),
+                        rs.getDouble("fats_per_100g"),
+                        rs.getDouble("carbs_per_100g")
+                );
+
+                return Optional.of(product);
+            }
+
+            return Optional.empty();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding product by id", e);
+        }
+    }
+
+    @Override
+    public List<Product> findAll() {
+        String sql = """
+        SELECT id, name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
+        FROM product
+        ORDER BY id ASC
+        """;
+
+        List<Product> products = new ArrayList<>();
+
+        try (Connection conn = ConnectionUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                products.add(ProductMapper.mapRow(rs));
+            }
+
+            return products;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error finding all products", e);
+        }
+    }
+
+    @Override
+    public Product update(Product product) {
+        String sql = """
+        UPDATE product
+        SET name = ?, calories_per_100g = ?, proteins_per_100g = ?, fats_per_100g = ?, carbs_per_100g = ?
+        WHERE id = ?
+        """;
+
+        try (Connection conn = ConnectionUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, product.getName());
+            stmt.setInt(2, product.getCaloriesPer100g());
+            stmt.setDouble(3, product.getProteinsPer100g());
+            stmt.setDouble(4, product.getFatsPer100g());
+            stmt.setDouble(5, product.getCarbsPer100g());
+            stmt.setLong(6, product.getId());
+
+            stmt.executeUpdate();
+
+            return product;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating product", e);
+        }
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        String sql = """
+        DELETE FROM product
+        WHERE id = ?
+        """;
+
+        try (Connection conn = ConnectionUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Error deleting product", e);
+        }
+    }
+
 }
