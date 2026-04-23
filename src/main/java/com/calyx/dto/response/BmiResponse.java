@@ -1,4 +1,6 @@
 package com.calyx.dto.response;
 
-public record BmiResponse() {
-}
+public record BmiResponse(
+        double bmiValue,
+        String category
+) {}
