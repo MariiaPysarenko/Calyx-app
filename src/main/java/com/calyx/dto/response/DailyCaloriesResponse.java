@@ -1,4 +1,9 @@
 package com.calyx.dto.response;
 
-public record DailyCaloriesResponse() {
+import java.time.LocalDate;
+
+public record DailyCaloriesResponse(
+        Long userId,
+        LocalDate date,
+        int totalCalories) {
 }
