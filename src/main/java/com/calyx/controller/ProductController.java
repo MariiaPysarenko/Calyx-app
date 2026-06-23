@@ -21,4 +21,16 @@ public class ProductController {
     public List<ProductResponse> getAll() {
         return productService.getAllProducts();
     }
+
+    public ProductResponse getById(Long id) {
+        return productService.getProductById(id);
+    }
+
+    public ProductResponse update(Long id, ProductRequest request) {
+        return productService.updateProduct(id, request);
+    }
+
+    public void delete(Long id) {
+        productService.deleteProduct(id);
+    }
 }
