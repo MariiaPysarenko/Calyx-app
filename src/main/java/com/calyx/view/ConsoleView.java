@@ -7,29 +7,33 @@ import com.calyx.controller.ProductController;
 import com.calyx.controller.UserController;
 import com.calyx.dto.request.BmiRequest;
 import com.calyx.dto.request.CreateUserRequest;
-import com.calyx.dto.request.MealEntryRequest;
+import com.calyx.dto.request.DailyLogMealRequest;
+import com.calyx.dto.request.DailyLogProductRequest;
+import com.calyx.dto.request.MealIngredientRequest;
 import com.calyx.dto.request.MealRequest;
 import com.calyx.dto.request.ProductRequest;
 import com.calyx.dto.response.BmiResponse;
 import com.calyx.dto.response.DailyCaloriesResponse;
-import com.calyx.dto.response.MealEntryResponse;
+import com.calyx.dto.response.DailyLogEntryResponse;
+import com.calyx.dto.response.MealIngredientResponse;
 import com.calyx.dto.response.MealResponse;
 import com.calyx.dto.response.ProductResponse;
 import com.calyx.dto.response.UserResponse;
 import com.calyx.repository.impl.BmiRepositoryImpl;
-import com.calyx.repository.impl.MealEntryRepositoryImpl;
+import com.calyx.repository.impl.DailyLogRepositoryImpl;
+import com.calyx.repository.impl.MealIngredientRepositoryImpl;
 import com.calyx.repository.impl.MealRepositoryImpl;
 import com.calyx.repository.impl.ProductRepositoryImpl;
 import com.calyx.repository.impl.UserRepositoryImpl;
 import com.calyx.service.impl.BmiServiceImpl;
 import com.calyx.service.impl.CalorieServiceImpl;
-import com.calyx.service.impl.MealEntryServiceImpl;
+import com.calyx.service.impl.DailyLogServiceImpl;
+import com.calyx.service.impl.MealIngredientServiceImpl;
 import com.calyx.service.impl.MealServiceImpl;
 import com.calyx.service.impl.ProductServiceImpl;
 import com.calyx.service.impl.UserServiceImpl;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
@@ -47,18 +51,20 @@ public class ConsoleView {
         var userRepository = new UserRepositoryImpl();
         var productRepository = new ProductRepositoryImpl();
         var mealRepository = new MealRepositoryImpl();
-        var mealEntryRepository = new MealEntryRepositoryImpl();
+        var mealIngredientRepository = new MealIngredientRepositoryImpl();
+        var dailyLogRepository = new DailyLogRepositoryImpl();
         var bmiRepository = new BmiRepositoryImpl();
 
         userController = new UserController(new UserServiceImpl(userRepository));
         productController = new ProductController(new ProductServiceImpl(productRepository));
         mealController = new MealController(
                 new MealServiceImpl(mealRepository, userRepository),
-                new MealEntryServiceImpl(mealEntryRepository, mealRepository, productRepository)
+                new MealIngredientServiceImpl(mealIngredientRepository, mealRepository, productRepository),
+                new DailyLogServiceImpl(dailyLogRepository, productRepository, mealRepository, userRepository)
         );
         bmiController = new BmiController(new BmiServiceImpl(bmiRepository));
         calorieController = new CalorieController(
-                new CalorieServiceImpl(mealRepository, mealEntryRepository, userRepository)
+                new CalorieServiceImpl(dailyLogRepository, userRepository)
         );
     }
 
@@ -85,12 +91,15 @@ public class ConsoleView {
         System.out.println("2. List users");
         System.out.println("3. Create product");
         System.out.println("4. List products");
-        System.out.println("5. Create meal");
+        System.out.println("5. Create meal (recipe)");
         System.out.println("6. List meals by user");
-        System.out.println("7. Add meal entry");
-        System.out.println("8. List meal entries");
-        System.out.println("9. Calculate BMI");
-        System.out.println("10. Daily calories");
+        System.out.println("7. Add ingredient to meal");
+        System.out.println("8. List meal ingredients");
+        System.out.println("9. Log product to daily log");
+        System.out.println("10. Log meal to daily log");
+        System.out.println("11. View daily log");
+        System.out.println("12. Calculate BMI");
+        System.out.println("13. Daily calories");
         System.out.println("0. Exit");
         System.out.print("Choose option: ");
     }
@@ -122,18 +131,30 @@ public class ConsoleView {
                 yield true;
             }
             case "7" -> {
-                addMealEntry();
+                addIngredient();
                 yield true;
             }
             case "8" -> {
-                listMealEntries();
+                listIngredients();
                 yield true;
             }
             case "9" -> {
-                calculateBmi();
+                logProduct();
                 yield true;
             }
             case "10" -> {
+                logMeal();
+                yield true;
+            }
+            case "11" -> {
+                viewDailyLog();
+                yield true;
+            }
+            case "12" -> {
+                calculateBmi();
+                yield true;
+            }
+            case "13" -> {
                 showDailyCalories();
                 yield true;
             }
@@ -189,7 +210,7 @@ public class ConsoleView {
         double carbs = Double.parseDouble(scanner.nextLine());
 
         ProductResponse product = productController.create(
-                new ProductRequest(name, calories, proteins, fats, carbs)
+                new ProductRequest(name, "other", calories, proteins, fats, carbs)
         );
         System.out.println("Product created: " + product);
     }
@@ -206,12 +227,10 @@ public class ConsoleView {
     private void createMeal() {
         System.out.print("User id: ");
         Long userId = Long.parseLong(scanner.nextLine());
-        System.out.print("Meal type: ");
-        String mealType = scanner.nextLine();
-        System.out.print("Date and time (yyyy-MM-ddTHH:mm:ss): ");
-        LocalDateTime dateTime = LocalDateTime.parse(scanner.nextLine());
+        System.out.print("Recipe name: ");
+        String name = scanner.nextLine();
 
-        MealResponse meal = mealController.createMeal(new MealRequest(userId, mealType, dateTime));
+        MealResponse meal = mealController.createMeal(new MealRequest(userId, name));
         System.out.println("Meal created: " + meal);
     }
 
@@ -227,7 +246,7 @@ public class ConsoleView {
         meals.forEach(System.out::println);
     }
 
-    private void addMealEntry() {
+    private void addIngredient() {
         System.out.print("Meal id: ");
         Long mealId = Long.parseLong(scanner.nextLine());
         System.out.print("Product id: ");
@@ -235,20 +254,73 @@ public class ConsoleView {
         System.out.print("Grams: ");
         double grams = Double.parseDouble(scanner.nextLine());
 
-        MealEntryResponse entry = mealController.addEntry(new MealEntryRequest(mealId, productId, grams));
-        System.out.println("Meal entry added: " + entry);
+        MealIngredientResponse ingredient = mealController.addIngredient(
+                new MealIngredientRequest(mealId, productId, grams)
+        );
+        System.out.println("Ingredient added: " + ingredient);
     }
 
-    private void listMealEntries() {
+    private void listIngredients() {
         System.out.print("Meal id: ");
         Long mealId = Long.parseLong(scanner.nextLine());
 
-        List<MealEntryResponse> entries = mealController.getEntriesByMeal(mealId);
-        if (entries.isEmpty()) {
-            System.out.println("No entries found");
+        List<MealIngredientResponse> ingredients = mealController.getIngredientsByMeal(mealId);
+        if (ingredients.isEmpty()) {
+            System.out.println("No ingredients found");
             return;
         }
-        entries.forEach(System.out::println);
+        ingredients.forEach(System.out::println);
+    }
+
+    private void logProduct() {
+        System.out.print("User id: ");
+        Long userId = Long.parseLong(scanner.nextLine());
+        System.out.print("Product id: ");
+        Long productId = Long.parseLong(scanner.nextLine());
+        System.out.print("Grams: ");
+        double grams = Double.parseDouble(scanner.nextLine());
+        System.out.print("Date (yyyy-MM-dd, blank for today): ");
+        String dateInput = scanner.nextLine().trim();
+        LocalDate date = dateInput.isEmpty() ? LocalDate.now() : LocalDate.parse(dateInput);
+
+        DailyLogEntryResponse entry = mealController.logProduct(
+                new DailyLogProductRequest(userId, productId, grams, date)
+        );
+        System.out.println("Logged product: " + entry);
+    }
+
+    private void logMeal() {
+        System.out.print("User id: ");
+        Long userId = Long.parseLong(scanner.nextLine());
+        System.out.print("Meal id: ");
+        Long mealId = Long.parseLong(scanner.nextLine());
+        System.out.print("Servings: ");
+        double servings = Double.parseDouble(scanner.nextLine());
+        System.out.print("Date (yyyy-MM-dd, blank for today): ");
+        String dateInput = scanner.nextLine().trim();
+        LocalDate date = dateInput.isEmpty() ? LocalDate.now() : LocalDate.parse(dateInput);
+
+        DailyLogEntryResponse entry = mealController.logMeal(
+                new DailyLogMealRequest(userId, mealId, servings, date)
+        );
+        System.out.println("Logged meal: " + entry);
+    }
+
+    private void viewDailyLog() {
+        System.out.print("User id: ");
+        Long userId = Long.parseLong(scanner.nextLine());
+        System.out.print("Date (yyyy-MM-dd): ");
+        try {
+            LocalDate date = LocalDate.parse(scanner.nextLine());
+            List<DailyLogEntryResponse> entries = mealController.getDailyLog(userId, date);
+            if (entries.isEmpty()) {
+                System.out.println("No entries for this date");
+                return;
+            }
+            entries.forEach(System.out::println);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format");
+        }
     }
 
     private void calculateBmi() {

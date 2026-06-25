@@ -83,6 +83,9 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
         existingProduct.setName(request.name());
+        existingProduct.setCategory(request.category() == null || request.category().isBlank()
+                ? existingProduct.getCategory()
+                : request.category().trim().toLowerCase());
         existingProduct.setCaloriesPer100g(request.caloriesPer100g());
         existingProduct.setProteinsPer100g(request.proteinsPer100g());
         existingProduct.setFatsPer100g(request.fatsPer100g());

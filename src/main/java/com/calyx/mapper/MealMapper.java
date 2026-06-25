@@ -6,7 +6,6 @@ import com.calyx.model.Meal;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 public class MealMapper {
 
@@ -14,8 +13,11 @@ public class MealMapper {
         return new Meal(
                 null,
                 request.userId(),
-                request.mealType(),
-                request.dateTime()
+                request.name(),
+                0,
+                0,
+                0,
+                0
         );
     }
 
@@ -23,18 +25,23 @@ public class MealMapper {
         return new MealResponse(
                 meal.getId(),
                 meal.getUserId(),
-                meal.getMealType(),
-                meal.getDateTime()
+                meal.getName(),
+                meal.getTotalCalories(),
+                meal.getTotalProteins(),
+                meal.getTotalFats(),
+                meal.getTotalCarbs()
         );
     }
 
     public static Meal mapRow(ResultSet rs) throws SQLException {
-        Timestamp timestamp = rs.getTimestamp("date_time");
         return new Meal(
                 rs.getLong("id"),
                 rs.getLong("user_id"),
-                rs.getString("meal_type"),
-                timestamp.toLocalDateTime()
+                rs.getString("name"),
+                rs.getInt("total_calories"),
+                rs.getDouble("total_proteins"),
+                rs.getDouble("total_fats"),
+                rs.getDouble("total_carbs")
         );
     }
 }

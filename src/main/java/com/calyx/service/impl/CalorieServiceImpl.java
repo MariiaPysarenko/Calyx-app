@@ -1,28 +1,20 @@
 package com.calyx.service.impl;
 
 import com.calyx.dto.response.DailyCaloriesResponse;
-import com.calyx.model.Meal;
-import com.calyx.model.MealEntry;
-import com.calyx.repository.MealEntryRepository;
-import com.calyx.repository.MealRepository;
+import com.calyx.repository.DailyLogRepository;
 import com.calyx.repository.UserRepository;
 import com.calyx.service.CalorieService;
 import com.calyx.util.Validator;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class CalorieServiceImpl implements CalorieService {
 
-    private final MealRepository mealRepository;
-    private final MealEntryRepository mealEntryRepository;
+    private final DailyLogRepository dailyLogRepository;
     private final UserRepository userRepository;
 
-    public CalorieServiceImpl(MealRepository mealRepository,
-                              MealEntryRepository mealEntryRepository,
-                              UserRepository userRepository) {
-        this.mealRepository = mealRepository;
-        this.mealEntryRepository = mealEntryRepository;
+    public CalorieServiceImpl(DailyLogRepository dailyLogRepository, UserRepository userRepository) {
+        this.dailyLogRepository = dailyLogRepository;
         this.userRepository = userRepository;
     }
 
@@ -36,20 +28,7 @@ public class CalorieServiceImpl implements CalorieService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<Meal> meals = mealRepository.findByUserId(userId);
-        int totalCalories = 0;
-
-        for (Meal meal : meals) {
-            if (!meal.getDateTime().toLocalDate().equals(date)) {
-                continue;
-            }
-
-            List<MealEntry> entries = mealEntryRepository.findByMealId(meal.getId());
-            for (MealEntry entry : entries) {
-                totalCalories += entry.getCalories();
-            }
-        }
-
+        int totalCalories = dailyLogRepository.sumCaloriesByUserIdAndDate(userId, date);
         return new DailyCaloriesResponse(userId, date, totalCalories);
     }
 }

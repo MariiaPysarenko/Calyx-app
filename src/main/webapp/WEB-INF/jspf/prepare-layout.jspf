@@ -1,0 +1,15 @@
+<%
+    if (request.getAttribute("activePage") == null) {
+        request.setAttribute("activePage", "");
+    }
+    if (request.getAttribute("pageTitle") == null) {
+        request.setAttribute("pageTitle", "Dashboard");
+    }
+    if (request.getAttribute("pageSubtitle") == null) {
+        request.setAttribute("pageSubtitle", "");
+    }
+    Object layoutUserName = request.getAttribute("userName");
+    if (layoutUserName == null || String.valueOf(layoutUserName).isBlank()) {
+        request.setAttribute("userName", "User");
+    }
+%>

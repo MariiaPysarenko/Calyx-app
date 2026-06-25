@@ -17,8 +17,8 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Product save(Product product) {
         String sql = """
-        INSERT INTO product (name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO product (name, category, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g)
+        VALUES (?, ?, ?, ?, ?, ?)
         RETURNING id
         """;
 
@@ -26,10 +26,11 @@ public class ProductRepositoryImpl implements ProductRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getName());
-            stmt.setInt(2, product.getCaloriesPer100g());
-            stmt.setDouble(3, product.getProteinsPer100g());
-            stmt.setDouble(4, product.getFatsPer100g());
-            stmt.setDouble(5, product.getCarbsPer100g());
+            stmt.setString(2, product.getCategory());
+            stmt.setInt(3, product.getCaloriesPer100g());
+            stmt.setDouble(4, product.getProteinsPer100g());
+            stmt.setDouble(5, product.getFatsPer100g());
+            stmt.setDouble(6, product.getCarbsPer100g());
 
             ResultSet rs = stmt.executeQuery();
 
@@ -47,7 +48,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Optional<Product> findById(Long id) {
         String sql = """
-        SELECT id, name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
+        SELECT id, name, category, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
         FROM product
         WHERE id = ?
         """;
@@ -60,16 +61,7 @@ public class ProductRepositoryImpl implements ProductRepository {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Product product = new Product(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getInt("calories_per_100g"),
-                        rs.getDouble("proteins_per_100g"),
-                        rs.getDouble("fats_per_100g"),
-                        rs.getDouble("carbs_per_100g")
-                );
-
-                return Optional.of(product);
+                return Optional.of(ProductMapper.mapRow(rs));
             }
 
             return Optional.empty();
@@ -82,9 +74,9 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public List<Product> findAll() {
         String sql = """
-        SELECT id, name, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
+        SELECT id, name, category, calories_per_100g, proteins_per_100g, fats_per_100g, carbs_per_100g
         FROM product
-        ORDER BY id ASC
+        ORDER BY name ASC
         """;
 
         List<Product> products = new ArrayList<>();
@@ -108,7 +100,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     public Product update(Product product) {
         String sql = """
         UPDATE product
-        SET name = ?, calories_per_100g = ?, proteins_per_100g = ?, fats_per_100g = ?, carbs_per_100g = ?
+        SET name = ?, category = ?, calories_per_100g = ?, proteins_per_100g = ?, fats_per_100g = ?, carbs_per_100g = ?
         WHERE id = ?
         """;
 
@@ -116,11 +108,12 @@ public class ProductRepositoryImpl implements ProductRepository {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getName());
-            stmt.setInt(2, product.getCaloriesPer100g());
-            stmt.setDouble(3, product.getProteinsPer100g());
-            stmt.setDouble(4, product.getFatsPer100g());
-            stmt.setDouble(5, product.getCarbsPer100g());
-            stmt.setLong(6, product.getId());
+            stmt.setString(2, product.getCategory());
+            stmt.setInt(3, product.getCaloriesPer100g());
+            stmt.setDouble(4, product.getProteinsPer100g());
+            stmt.setDouble(5, product.getFatsPer100g());
+            stmt.setDouble(6, product.getCarbsPer100g());
+            stmt.setLong(7, product.getId());
 
             stmt.executeUpdate();
 
@@ -148,5 +141,4 @@ public class ProductRepositoryImpl implements ProductRepository {
             throw new RuntimeException("Error deleting product", e);
         }
     }
-
 }

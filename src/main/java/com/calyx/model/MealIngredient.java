@@ -9,10 +9,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class MealEntry {
+public class MealIngredient {
     private Long id;
     private Long mealId;
     private Long productId;
     private double grams;
     private int calories;
+    private double proteins;
+    private double fats;
+    private double carbs;
 }

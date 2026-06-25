@@ -1,7 +1,7 @@
 package com.calyx.dto.request;
 
-public record MealEntryRequest(
+public record MealIngredientRequest(
         Long mealId,
         Long productId,
-        double grams
-) {}
+        double grams) {
+}

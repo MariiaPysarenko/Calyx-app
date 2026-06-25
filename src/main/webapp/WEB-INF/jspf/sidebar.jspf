@@ -1,0 +1,62 @@
+<aside class="sidebar" aria-label="Sidebar navigation">
+    <div class="sidebar__brand">
+        <div class="sidebar__logo" aria-hidden="true">🌿</div>
+        <div>
+            <p class="sidebar__title">Calyx</p>
+            <p class="sidebar__tagline">Health dashboard</p>
+        </div>
+    </div>
+
+    <nav class="sidebar__nav">
+        <p class="sidebar__section">Main</p>
+        <a class="sidebar__link${activePage eq 'home' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z"/>
+            </svg>
+            Dashboard
+        </a>
+        <a class="sidebar__link${activePage eq 'products' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/products">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M7 4h10l1 14H6L7 4Z"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+            </svg>
+            Products
+        </a>
+        <a class="sidebar__link${activePage eq 'meals' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/meals">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/>
+            </svg>
+            Meals
+        </a>
+        <a class="sidebar__link${activePage eq 'insights' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/insights">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/>
+            </svg>
+            Insights
+        </a>
+        <a class="sidebar__link${activePage eq 'bmi' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/bmi.jsp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2.5"/>
+            </svg>
+            BMI Calculator
+        </a>
+
+        <p class="sidebar__section">System</p>
+        <a class="sidebar__link${activePage eq 'more' ? ' is-active' : ''}"
+           href="${pageContext.request.contextPath}/more.jsp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+            </svg>
+            Settings
+        </a>
+    </nav>
+
+    <div class="sidebar__footer card card--muted">
+        <p class="sidebar__footer-title">Daily tip</p>
+        <p class="sidebar__footer-text">Consistent logging helps you spot patterns faster.</p>
+    </div>
+</aside>
