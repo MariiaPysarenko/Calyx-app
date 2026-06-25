@@ -1,7 +1,5 @@
 package com.calyx.model;
 
-
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +12,9 @@ import lombok.ToString;
 public class Meal {
     private Long id;
     private Long userId;
-    private String mealType;
-    private LocalDateTime dateTime;
+    private String name;
+    private int totalCalories;
+    private double totalProteins;
+    private double totalFats;
+    private double totalCarbs;
 }

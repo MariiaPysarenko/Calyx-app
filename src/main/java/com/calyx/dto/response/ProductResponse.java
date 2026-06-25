@@ -3,6 +3,7 @@ package com.calyx.dto.response;
 public record ProductResponse(
         Long id,
         String name,
+        String category,
         int caloriesPer100g,
         double proteinsPer100g,
         double fatsPer100g,

@@ -10,9 +10,14 @@ import java.sql.SQLException;
 public class ProductMapper {
 
     public static Product toEntity(ProductRequest request) {
+        String category = request.category() == null || request.category().isBlank()
+                ? "other"
+                : request.category().trim().toLowerCase();
+
         return new Product(
                 null,
                 request.name(),
+                category,
                 request.caloriesPer100g(),
                 request.proteinsPer100g(),
                 request.fatsPer100g(),
@@ -24,6 +29,7 @@ public class ProductMapper {
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
+                product.getCategory(),
                 product.getCaloriesPer100g(),
                 product.getProteinsPer100g(),
                 product.getFatsPer100g(),
@@ -35,6 +41,7 @@ public class ProductMapper {
         return new Product(
                 rs.getLong("id"),
                 rs.getString("name"),
+                rs.getString("category"),
                 rs.getInt("calories_per_100g"),
                 rs.getDouble("proteins_per_100g"),
                 rs.getDouble("fats_per_100g"),

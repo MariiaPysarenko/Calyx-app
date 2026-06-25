@@ -8,6 +8,14 @@ import java.sql.SQLException;
 
 public class ConnectionUtil {
 
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
                 DatabaseConfig.getUrl(),

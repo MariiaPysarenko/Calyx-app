@@ -23,10 +23,7 @@ public class MealServiceImpl implements MealService {
 
     private void validateRequest(MealRequest request) {
         Validator.requireValidId(request.userId(), "user id");
-        Validator.requireNonBlank(request.mealType(), "Meal type");
-        if (request.dateTime() == null) {
-            throw new IllegalArgumentException("Date and time must not be null");
-        }
+        Validator.requireNonBlank(request.name(), "Meal name");
     }
 
     @Override
@@ -38,7 +35,6 @@ public class MealServiceImpl implements MealService {
 
         Meal meal = MealMapper.toEntity(request);
         Meal saved = mealRepository.save(meal);
-
         return MealMapper.toResponse(saved);
     }
 

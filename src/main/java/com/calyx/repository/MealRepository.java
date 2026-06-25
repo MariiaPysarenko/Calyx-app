@@ -12,4 +12,6 @@ public interface MealRepository {
     Optional<Meal> findById(Long id);
 
     List<Meal> findByUserId(Long userId);
+
+    void updateTotals(Meal meal);
 }
